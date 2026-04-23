@@ -489,7 +489,7 @@ export default function App() {
   };
 
   // ── Helpers ────────────────────────────────────
-  function toast$(msg, type = "ok", dur = 3200) { setToast({ msg, type }); setTimeout(() => setToast(null), dur); }
+  const toast$ = (msg, type="ok", dur=3200) => { setToast({msg,type}); setTimeout(()=>setToast(null),dur); };
   const isPremium = isUnlocked || (trialLeft > 0 && !trialLoading);
   const activePatient = patients.find(p=>p.id===activePid) || null;
   const changeLang = l => { setLang(l); localStorage.setItem(KEY_LANG,l); };
@@ -517,7 +517,6 @@ export default function App() {
       toast$(lang==="EN"?"Saved":"บันทึกแล้ว");
     }
     setPatientModal(null);
-  };
   };
   const deletePatient = (pid) => {
     try { localStorage.removeItem(recKey(pid)); } catch {}
