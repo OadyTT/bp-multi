@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // ═══════════════════════════════════════════════════
 //  BP-MULTI  v1.0.0  —  Multi-patient · Local-only
@@ -25,6 +25,7 @@ const lsGet = (k, fb) => { try { const v = localStorage.getItem(k); return v ? J
 const lsSet = (k, v)  => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 const lsRaw = (k)     => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
 const todayISO = () => new Date().toISOString().split("T")[0];
+const nowStr   = () => new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" });
 const toThai   = (iso, lang = "TH") => {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
@@ -486,10 +487,10 @@ export default function App() {
     window.addEventListener("appinstalled", ()=>{ setIsInstalled(true); setDeferredPrompt(null); });
     setLoaded(true);
     return () => window.removeEventListener("beforeinstallprompt", hbi);
-  };
+  }, []);
 
   // ── Helpers ────────────────────────────────────
-  function toast$(msg, type = "ok", dur = 3200) { setToast({ msg, type }); setTimeout(() => setToast(null), dur); }
+  const toast$ = (msg, type="ok", dur=3200) => { setToast({msg,type}); setTimeout(()=>setToast(null),dur); };
   const isPremium = isUnlocked || (trialLeft > 0 && !trialLoading);
   const activePatient = patients.find(p=>p.id===activePid) || null;
   const changeLang = l => { setLang(l); localStorage.setItem(KEY_LANG,l); };
@@ -518,7 +519,6 @@ export default function App() {
     }
     setPatientModal(null);
   };
-  };
   const deletePatient = (pid) => {
     try { localStorage.removeItem(recKey(pid)); } catch {}
     const updated = patients.filter(p=>p.id!==pid);
@@ -530,11 +530,11 @@ export default function App() {
     setDeleteConfirm(null);
     toast$(lang==="EN"?"Patient deleted":"ลบแล้ว");
   };
-  const selectPatient = (pid) => {
+  const selectPatient = useCallback((pid) => {
     setActivePid(pid); localStorage.setItem(KEY_ACTIVE, pid);
     setRecords(lsGet(recKey(pid),[]));
-    setForm({ date:todayISO(), morningTime:"", morningSys:"", morningDia:"", morningPulse:"", eveningTime:"", eveningSys:"", eveningDia:"", eveningPulse:"" }); setEditRecord(null); setTab("record");
-  };
+    setForm(emptyForm); setEditRecord(null); setTab("record");
+  }, []);
 
   // ── Form ───────────────────────────────────────
   const changeDate = (newDate) => {
