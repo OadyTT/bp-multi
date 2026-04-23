@@ -486,7 +486,7 @@ export default function App() {
     window.addEventListener("appinstalled", ()=>{ setIsInstalled(true); setDeferredPrompt(null); });
     setLoaded(true);
     return () => window.removeEventListener("beforeinstallprompt", hbi);
-  };
+  }, []);
 
   // ── Helpers ────────────────────────────────────
   const toast$ = (msg, type="ok", dur=3200) => { setToast({msg,type}); setTimeout(()=>setToast(null),dur); };
